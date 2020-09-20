@@ -1,0 +1,19 @@
+pipeline {
+    agent any 
+    environment{
+       PATH = "/usr/bin:$PATH"
+    }
+    
+    stages {
+        stage("git checkout") {
+            steps {
+                git credentialsId: 'github', url: 'https://github.com/KumarK250/project_1.git'
+            }
+        }
+        stage("Maven Build") {
+            steps {
+                sh "mvn clean package"
+            }
+        }
+    }
+}
