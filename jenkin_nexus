@@ -1,0 +1,45 @@
+pipeline {
+    agent any 
+     environment{
+       PATH = "/usr/bin:$PATH"
+       DOCKER_TAG = "getVersion()"     }
+       
+    stages {
+        stage("git checkout") {
+            steps {
+                git credentialsId: 'github', url: 'https://github.com/KumarK250/project_1.git'
+            }
+        }
+        stage("Maven Build") {
+            steps {
+                sh "mvn clean package"
+                
+            
+        }
+         
+         
+        }
+           stage('upload war to Nexus') {
+      steps {  
+
+            def mavenPom = readMavenPom 'pom.xml'
+
+             nexusArtifactUploader artifacts: [
+[artifactId: 'WebAppCal', 
+classifier: '', 
+file: 'target/WebAppCal-${mavenPom.version}.war',
+ type: 'war'
+]
+], 
+credentialsId: 'nexus3', 
+groupId: 'com.web.cal', 
+nexusUrl: '3.236.148.125', 
+nexusVersion: 'nexus2', 
+protocol: 'http', 
+repository: 'http://3.236.148.125:8081/nexus/content/repositories/releases', 
+version: '${mavenPom.version}'
+         }
+
+      }
+ }
+}
