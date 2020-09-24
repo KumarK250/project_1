@@ -5,5 +5,8 @@ node {
   stage('compile-package') {
   sh 'mvn package'
 }
+stage('Email notification') {
+mail bcc: '', body: 'Test Email', cc: '', from: '', replyTo: '', subject: 'Test', to: 'kiranreddy.sa@gmail.com'
+}
   
 }
