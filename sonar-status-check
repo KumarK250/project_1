@@ -1,0 +1,45 @@
+pipeline {
+    agent any 
+    environment{
+       PATH = "/usr/bin:$PATH"
+    }
+    
+    stages {
+        stage("git checkout") {
+            steps {
+                git credentialsId: 'github', url: 'https://github.com/KumarK250/project_1.git'
+            }
+        }
+        stage("Maven Build") {
+            steps {
+                sh "mvn clean package"
+                	
+            }
+        }
+         stage("Sonar Cube Analysis") {
+
+         steps {
+         withSonarQubeEnv('Sonar-6') {
+         sh "mvn sonar:sonar" 
+}  
+         
+}
+         
+        }
+       stage("Quality Gate"){
+          timeout(time: 1, unit: 'HOURS') {
+              def qg = waitForQualityGate()
+              if (qg.status != 'OK') {
+
+                 slackSend baseurl: 'https://hooks.slack.com/services/',
+                 channel: '#jenkins-pipeline-demo',
+                 color: 'danger',
+                 message: 'Sonarcube analysis Failed',
+                 teamDomain: 'javahomecloud',
+                 tokenCredentialsId,'slack-demo'
+                  error "Pipeline aborted due to quality gate failure: ${qg.status}"
+              }
+          }
+      }    
+    }
+}
